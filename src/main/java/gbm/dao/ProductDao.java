@@ -8,7 +8,7 @@ public interface ProductDao {
 
     Product createProduct(Product product);
     
-    Product updateProduct(Product product);
+    boolean updateProduct(Product product);
 
-    void deleteProduct(String id);
+    boolean deleteProduct(String id);
 }

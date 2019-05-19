@@ -7,6 +7,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import gbm.model.Product;
+import gbm.model.WarehouseServiceResponse;
 import gbm.service.WarehouseService;
 
 /**
@@ -18,6 +19,7 @@ public final class App {
     */
     public static void main(String[] args) {
         Injector injector = Guice.createInjector(new WarehouseModule());
+        Gson gsonParser = new Gson();
         WarehouseService warehouseService = injector.getInstance(WarehouseService.class);
 
         get("/health", (req, res) -> "Warehouse Service is up and running!");
@@ -26,9 +28,9 @@ public final class App {
                 String id = req.params("id");
                 Product product = warehouseService.getProduct(id);
                 if (product.getUuid() == null) {
-                    return new Gson().toJson(null);
+                    return gsonParser.toJson(buildResponse(404));
                 } else {
-                    return new Gson().toJson(product);            
+                    return gsonParser.toJson(buildResponse(200, product));
                 }     
             
         });
@@ -36,21 +38,41 @@ public final class App {
         post("/api/product", (req, res) -> {
             Product productToInsert = new Gson().fromJson(req.body(), Product.class);
             Product insertedProduct = warehouseService.createNewProduct(productToInsert);
-            return new Gson().toJson(insertedProduct);
+            return gsonParser.toJson(buildResponse(200, insertedProduct));
         });
         
         put("/api/product/:id", (req, res) -> {
             String id = req.params("id");
             Product productToUpdate = new Gson().fromJson(req.body(), Product.class);
             productToUpdate.setUuid(id);
-            warehouseService.updateProduct(productToUpdate);
-            return new Gson().toJson(productToUpdate);
+            boolean updateStatus = warehouseService.updateProduct(productToUpdate);
+            if(updateStatus) {
+                return gsonParser.toJson(buildResponse(200, productToUpdate));
+            } else {
+                return gsonParser.toJson(buildResponse(404));
+            }
         });
 
         delete("api/product/:id", (req, res) -> {
             String id = req.params("id");
-            warehouseService.deleteProduct(id);
-            return "";
+            boolean deleteStatus = warehouseService.deleteProduct(id);
+            if (deleteStatus) {
+                return gsonParser.toJson(buildResponse(200));
+            } else {
+                return gsonParser.toJson(buildResponse(404));
+            }
+            
         });
+    }
+
+    private static WarehouseServiceResponse buildResponse(int status, Product product) {
+        WarehouseServiceResponse.Builder responseBuilder = new WarehouseServiceResponse.Builder();
+        String productAsString = new Gson().toJson(product);
+        return responseBuilder.setStatus(status).setMessage(productAsString).build();
+    }
+
+    private static WarehouseServiceResponse buildResponse(int status) {
+        WarehouseServiceResponse.Builder responseBuilder = new WarehouseServiceResponse.Builder();
+        return responseBuilder.setStatus(status).build();
     }
 }

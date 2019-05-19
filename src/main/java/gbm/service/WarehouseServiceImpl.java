@@ -1,5 +1,7 @@
 package gbm.service;
 
+import java.util.List;
+
 import com.google.inject.Inject;
 
 import gbm.model.Product;
@@ -24,13 +26,23 @@ public final class WarehouseServiceImpl implements WarehouseService {
 	}
 
 	@Override
-	public Product updateProduct(Product product) {
-		return productDao.updateProduct(product);
+	public boolean updateProduct(Product product) {
+		Product productInDb = productDao.getProduct(product.getUuid());
+
+		if(productInDb != null) {
+			List<Long> quantityHistory = productInDb.getQuantityHistory();
+			quantityHistory.add(product.getQuantity());
+			product.setQuantityHistory(quantityHistory);
+			return productDao.updateProduct(product);		
+		} else {
+			return false;
+		}
+
 	}
 
 	@Override
-	public void deleteProduct(String id) {
-		productDao.deleteProduct(id);
+	public boolean deleteProduct(String id) {
+		return productDao.deleteProduct(id);
 	}
 
 }

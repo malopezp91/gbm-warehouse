@@ -7,7 +7,7 @@ public interface WarehouseService {
 
     Product createNewProduct(Product product);
 
-    Product updateProduct(Product product);
+    boolean updateProduct(Product product);
 
-    void deleteProduct(String id);
+    boolean deleteProduct(String id);
 }

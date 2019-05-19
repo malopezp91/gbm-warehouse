@@ -1,11 +1,14 @@
 package gbm.model;
 
+import java.util.List;
+
 public final class Product {
     private String uuid;
     private String name;
     private String description;
     private double price;
     private long quantity;
+    private List<Long> quantityHistory;
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -47,12 +50,21 @@ public final class Product {
         return this.quantity;
     }
 
+    public void setQuantityHistory(List<Long> quantityHistory){
+        this.quantityHistory = quantityHistory;
+    }
+
+    public List<Long> getQuantityHistory() {
+        return this.quantityHistory;
+    }
+
     public static class Builder {
         private String uuid;
         private String name;
         private String description;
         private double price;
         private long quantity;
+        private List<Long> quantityHistory;
 
         public Builder setUuid(String uuid) {
             this.uuid = uuid;
@@ -76,6 +88,11 @@ public final class Product {
 
         public Builder setQuantity(long quantity) {
             this.quantity = quantity;
+            return this;
+        }
+
+        public Builder setQuantityHistory(List<Long> quantityHistory) {
+            this.quantityHistory = quantityHistory;
             return this;
         }
 
